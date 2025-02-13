@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arogya Health Pro</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1A73E8;
+            --accent-teal: #00BFA5;
+            --text-dark: #2D3748;
+            --background: #F8F9FC;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+        }
+
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0F4C81 0%, #1A365D 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 3rem;
+            z-index: 1000;
+            animation: fadeOut 2s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                display: none;
+            }
+        }
+
+        /* Login Page */
+        .login-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0F4C81 0%, #1A365D 100%);
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .role-btn {
+            padding: 1rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .patient-btn {
+            background: var(--accent-teal);
+            color: white;
+        }
+
+        .doctor-btn {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Main Interface */
+        .main-container {
+            display: none;
+            padding: 20px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px 25px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 30px;
+            font-size: 16px;
+        }
+
+        .suggestions-box {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #F8F9FC;
+        }
+
+        /* Scrollable Health Boxes */
+        .health-scroll {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+
+        .health-box {
+            min-width: 280px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .health-box:hover {
+            transform: translateY(-3px);
+        }
+
+        /*Scrollable Medicine Boxes*/
+        .medicine-scroll {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+
+        .medicine-box {
+            min-width: 280px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .medicine-box:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Consultation Modal */
+        .consultation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .video-placeholder {
+            background: #f0f0f0;
+            height: 200px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+            margin: 1rem 0;
+            flex-direction: column;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Confirmation Popup Styles */
+        .confirmation-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 3000;
+            display: none;
+            text-align: center;
+        }
+
+        .confirmation-popup h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-popup p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Error Message Styles */
+        .error-message {
+            color: red;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">AROGYA</div>
+
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <div class="login-card">
+            <h2>Arogya Health Pro</h2>
+            <p style="margin: 1rem 0">Secure Medical Access Portal</p>
+            <input type="password" id="password" placeholder="Password"
+                style="margin-bottom: 1rem; padding: 0.75rem; border-radius: 8px; border: 1px solid #ccc; width: 100%;">
+            <button class="role-btn patient-btn" onclick="showMainPage('patient')">
+                Patient Login
+            </button>
+            <button class="role-btn doctor-btn" onclick="showMainPage('doctor')">
+                Medical Professional Login
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="main-container" id="mainPage">
+        <div class="trending-problems">
+            <h2>Trending Health Problems</h2>
+            <p>Explore common health concerns and find expert advice.</p>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Search health concerns..." id="searchInput">
+            <div class="suggestions-box" id="suggestions"></div>
+        </div>
+
+        <div class="health-scroll" id="healthScroll"></div>
+
+        <!-- Trending Medicines -->
+        <div class="trending-medicines">
+            <h2>Trending Medicines</h2>
+            <p>Explore a selection of trending medicines.</p>
+        </div>
+
+        <div class="medicine-scroll" id="medicineScroll"></div>
+    </div>
+
+    <!-- Consultation Modal -->
+    <div class="consultation-modal" id="consultationModal">
+        <div class="modal-content">
+            <h3 id="diseaseTitle">Health Condition</h3>
+
+            <div class="video-placeholder">
+                <span class="material-icons" style="font-size: 3rem">ondemand_video</span>
+                <p>Educational Video Content</p>
+            </div>
+
+            <div class="expert-info">
+                <h4>Verified by:</h4>
+                <p id="expertName">Dr. John Smith</p>
+                <p id="expertCredentials">MD, General Medicine</p>
+                <p>12+ years experience</p>
+            </div>
+
+            <form class="consultation-form" onsubmit="scheduleConsultation(event)">
+                <h4>Schedule Consultation</h4>
+                <div class="form-group">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName" placeholder="Full Name" required>
+                    <div id="fullNameError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" placeholder="Age" min="1" required>
+                    <div id="ageError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" required>
+                        <option value="">Select Gender</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+                    <div id="genderError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="concerns">Health Concerns:</label>
+                    <textarea id="concerns" placeholder="Describe your health concerns..." rows="3" required></textarea>
+                    <div id="concernsError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="dateTime">Date and Time:</label>
+                    <input type="datetime-local" id="dateTime" required>
+                    <div id="dateTimeError" class="error-message"></div>
+                </div>
+
+                <button type="submit" class="role-btn patient-btn">
+                    Schedule Consultation
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Popup -->
+    <div class="confirmation-popup" id="confirmationPopup">
+        <h3>Consultation Details</h3>
+        <p><strong>Name:</strong> <span id="confirmName"></span></p>
+        <p><strong>Age:</strong> <span id="confirmAge"></span></p>
+        <p><strong>Gender:</strong> <span id="confirmGender"></span></p>
+        <p><strong>Concerns:</strong> <span id="confirmConcerns"></span></p>
+        <p><strong>Date/Time:</strong> <span id="confirmDateTime"></span></p>
+        <button onclick="closeConfirmation()" class="role-btn patient-btn">Close</button>
+    </div>
+
+    <script>
+        // Health Data
+        const healthConditions = [{
+            name: "Diabetes Management",
+            expert: "Dr. Anika Rao",
+            desc: "Comprehensive diabetes care plans",
+            videoUrl: "https://example.com/diabetes_video"
+        },
+        {
+            name: "Cardiac Care",
+            expert: "Dr. Rajesh Kumar",
+            desc: "Advanced heart health monitoring",
+            videoUrl: "https://example.com/cardiac_video"
+        },
+        {
+            name: "Mental Wellness",
+            expert: "Dr. Priya Singh",
+            desc: "Stress and anxiety management",
+            videoUrl: "https://example.com/mental_video"
+        },
+        {
+            name: "Pediatric Care",
+            expert: "Dr. Arjun Mehta",
+            desc: "Child health specialists",
+            videoUrl: "https://example.com/pediatric_video"
+        },
+        {
+            name: "Women's Health",
+            expert: "Dr. Neha Sharma",
+            desc: "Complete women's wellness",
+            videoUrl: "https://example.com/womens_video"
+        },
+        {
+            name: "Chronic Pain",
+            expert: "Dr. Amit Patel",
+            desc: "Pain management solutions",
+            videoUrl: "https://example.com/pain_video"
+        },
+        {
+            name: "Respiratory Care",
+            expert: "Dr. Deepak Joshi",
+            desc: "Lung health specialists",
+            videoUrl: "https://example.com/respiratory_video"
+        },
+        {
+            name: "Nutrition Guidance",
+            expert: "Dr. Sneha Reddy",
+            desc: "Dietary planning experts",
+            videoUrl: "https://example.com/nutrition_video"
+        },
+        {
+            name: "Sleep Disorders",
+            expert: "Dr. Vikram Gupta",
+            desc: "Sleep quality improvement",
+            videoUrl: "https://example.com/sleep_video"
+        },
+        {
+            name: "Bone Health",
+            expert: "Dr. Anjali Kapoor",
+            desc: "Osteoporosis prevention",
+            videoUrl: "https://example.com/bone_video"
+        }
+        ];
+        // Medicine Data
+        const trendingMedicines = [{
+            name: "Paracetamol",
+            description: "Relieves fever and pain.",
+            videoUrl: "https://example.com/paracetamol_video"
+        },
+        {
+            name: "Amoxicillin",
+            description: "Treats bacterial infections.",
+            videoUrl: "https://example.com/amoxicillin_video"
+        },
+        {
+            name: "Loratadine",
+            description: "Antihistamine for allergies.",
+            videoUrl: "https://example.com/loratadine_video"
+        },
+        {
+            name: "Omeprazole",
+            description: "Reduces stomach acid production.",
+            videoUrl: "https://example.com/omeprazole_video"
+        },
+        {
+            name: "Simvastatin",
+            description: "Lowers cholesterol levels.",
+            videoUrl: "https://example.com/simvastatin_video"
+        },
+        {
+            name: "Metformin",
+            description: "Manages blood sugar levels.",
+            videoUrl: "https://example.com/metformin_video"
+        },
+        {
+            name: "Aspirin",
+            description: "Pain relief and anti-inflammatory.",
+            videoUrl: "https://example.com/aspirin_video"
+        },
+        {
+            name: "Ibuprofen",
+            description: "Reduces pain and inflammation.",
+            videoUrl: "https://example.com/ibuprofen_video"
+        },
+        {
+            name: "Cetirizine",
+            description: "Treats allergy symptoms.",
+            videoUrl: "https://example.com/cetirizine_video"
+        },
+        {
+            name: "Vitamin D",
+            description: "Supports bone health.",
+            videoUrl: "https://example.com/vitamin_d_video"
+        }
+        ];
+
+        // Passwords (for demonstration purposes only, store securely in a real application)
+        const passwords = {
+            patient: "patient123",
+            doctor: "doctor456"
+        };
+
+        // Initialize App
+        function initializeApp() {
+            // Hide splash screen after 2 seconds
+            setTimeout(() => {
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('loginPage').style.display = 'flex';
+            }, 2000);
+
+            // Initialize health boxes
+            initializeHealthBoxes();
+            // Initialize medicine boxes
+            initializeMedicineBoxes();
+        }
+
+        // Show Consultation
+        function showConsultation(condition) {
+            document.getElementById('consultationModal').style.display = 'flex';
+            document.getElementById('diseaseTitle').textContent = condition.name;
+            document.getElementById('expertName').textContent = condition.expert;
+            // You can fetch more details or load a video based on the condition here
+        }
+
+        // Schedule Consultation Form Submission
+        function scheduleConsultation(event) {
+            event.preventDefault();
+
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+
+            // Get form values
+            const fullName = document.getElementById('fullName').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const concerns = document.getElementById('concerns').value;
+            const dateTime = document.getElementById('dateTime').value;
+
+            // Format date and time
+            const formattedDateTime = new Date(dateTime).toLocaleString();
+
+            // Set confirmation popup values
+            document.getElementById('confirmName').textContent = fullName;
+            document.getElementById('confirmAge').textContent = age;
+            document.getElementById('confirmGender').textContent = gender;
+            document.getElementById('confirmConcerns').textContent = concerns;
+            document.getElementById('confirmDateTime').textContent = formattedDateTime;
+
+            // Show confirmation popup
+            document.getElementById('confirmationPopup').style.display = 'block';
+
+            // Optionally hide modal
+            document.getElementById('consultationModal').style.display = 'none';
+        }
+
+        // Form Validation
+        function validateForm() {
+            let isValid = true;
+
+            // Reset error messages
+            resetErrorMessages();
+
+            // Full Name validation
+            const fullName = document.getElementById('fullName').value.trim();
+            if (fullName === '') {
+                displayErrorMessage('fullName', 'Full Name is required');
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(fullName)) {
+                displayErrorMessage('fullName', 'Full Name must contain only letters and spaces');
+                isValid = false;
+            }
+
+            // Age validation
+            const age = document.getElementById('age').value;
+            if (age === '') {
+                displayErrorMessage('age', 'Age is required');
+                isValid = false;
+            } else if (isNaN(age) || age < 1 || age > 120) {
+                displayErrorMessage('age', 'Age must be a number between 1 and 120');
+                isValid = false;
+            }
+
+            // Gender validation
+            const gender = document.getElementById('gender').value;
+            if (gender === '') {
+                displayErrorMessage('gender', 'Gender is required');
+                isValid = false;
+            }
+
+            // Concerns validation
+            const concerns = document.getElementById('concerns').value.trim();
+            if (concerns === '') {
+                displayErrorMessage('concerns', 'Health Concerns are required');
+                isValid = false;
+            }
+
+            // Date and Time validation
+            const dateTime = document.getElementById('dateTime').value;
+            if (dateTime === '') {
+                displayErrorMessage('dateTime', 'Date and Time are required');
+                isValid = false;
+            } else if (new Date(dateTime) <= new Date()) {
+                displayErrorMessage('dateTime', 'Date and Time must be in the future');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Display Error Message
+        function displayErrorMessage(fieldId, message) {
+            const errorDivId = fieldId + 'Error';
+            document.getElementById(errorDivId).textContent = message;
+        }
+
+        // Reset Error Messages
+        function resetErrorMessages() {
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(message => {
+                message.textContent = '';
+            });
+        }
+
+        // Close Confirmation Popup
+        function closeConfirmation() {
+            document.getElementById('confirmationPopup').style.display = 'none';
+            document.getElementById('consultationModal').style.display = 'none';
+        }
+
+        // Create medicine Boxes
+        function initializeMedicineBoxes() {
+            const container = document.getElementById('medicineScroll');
+            trendingMedicines.forEach(medicine => {
+                const box = document.createElement('div');
+                box.className = 'medicine-box';
+                box.innerHTML = `
+                    <h4>${medicine.name}</h4>
+                    <p style="margin: 10px 0; color: #666">${medicine.description}</p>
+                `;
+                box.onclick = () => showConsultation(medicine); // You can create a separate showMedicineDetails function if needed
+                container.appendChild(box);
+            });
+        }
+
+        // Create Health Boxes
+        function initializeHealthBoxes() {
+            const container = document.getElementById('healthScroll');
+            healthConditions.forEach(condition => {
+                const box = document.createElement('div');
+                box.className = 'health-box';
+                box.innerHTML = `
+                    <h4>${condition.name}</h4>
+                    <p style="margin: 10px 0; color: #666">${condition.desc}</p>
+                    <div style="color: var(--primary-blue); font-size: 0.9rem">
+                        <span class="material-icons" style="vertical-align: middle">verified</span>
+                        ${condition.expert}
+                    </div>
+                `;
+                box.onclick = () => showConsultation(condition);
+                container.appendChild(box);
+            });
+        }
+
+        // Show Main Page
+        function showMainPage(role) {
+            const password = document.getElementById('password').value;
+            if (passwords[role] === password) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+            } else {
+                alert('Incorrect password. Please try again.');
+            }
+        }
+
+        // Search Suggestions
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const suggestions = document.getElementById('suggestions');
+            suggestions.innerHTML = '';
+
+            if (searchTerm.length > 0) {
+                const filtered = healthConditions.filter(condition =>
+                    condition.name.toLowerCase().includes(searchTerm) ||
+                    condition.desc.toLowerCase().includes(searchTerm)
+                );
+
+                filtered.forEach(condition => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.textContent = condition.name;
+                    div.onclick = () => {
+                        document.getElementById('searchInput').value = condition.name;
+                        suggestions.style.display = 'none';
+
+                        showConsultation(condition); // Optionally show consultation when suggestion is clicked
+                    };
+                    suggestions.appendChild(div);
+                });
+                suggestions.style.display = 'block';
+            } else {
+                suggestions.style.display = 'none';
+            }
+        });
+
+        // Initialize when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+
+</html>
